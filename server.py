@@ -23,6 +23,14 @@ for i in range(NUM_PLAYERS):
 
 
 def contactPlayer(player_id, game_control):
+    ''' Purpose: function will be called by thread, it will run the play flow for each user turn
+        Flow: * Acquire semaphore for current player 
+              * set current player to game_control object
+              * Run flow of each turn by calling play_turn() method
+              * player_turn() method will return True or False
+              * If value is True means the game has result, the loop will be terminated
+              * If value if False, sermaphore will be released for the next player
+    '''
     while True:
         locks[player_id].acquire()
         game_control.set_current_player(player_id)
@@ -49,6 +57,7 @@ print('Server: ', sock.getsockname())
 # init game control object
 game_control = GameControl(NUM_ROWS, NUM_COLS)
 new_player = None
+
 # only accept NUM_PLAYERS connections
 for player_id in range(NUM_PLAYERS):
     # wait until a connection is established
@@ -57,10 +66,11 @@ for player_id in range(NUM_PLAYERS):
     new_player = Player(sc, PLAYER_SYMBOLS[player_id])
     # add new_player to game_control
     game_control.add_player(new_player)
-    print('Client connected:', sc.getpeername()) 
+    print('Client connected:', sc.getpeername())
+    # create thread for new player 
     threading.Thread(target = contactPlayer, args = (player_id, game_control)).start()
 
-# send second player flag that the first turn is other player
+# send second player OTHER_PLAYER_TURN flag to notify that the first turn is other player
 new_player.send_flag(helper.OTHER_PLAYER_TURN)
 locks[0].release()
 

@@ -57,9 +57,14 @@ def send_input(sc, data):
     sc.sendall(data_byte)
 
 while True:
+    ''' The work flow of client
+            * Receive flag from server
+            * get and print board from server
+            * run the code block based on flag value
+    '''
     try:
         flag = helper.recv_fixed_buf_size_mes(sock, helper.PACK_BUF_SIZE)
-        #print(flag)
+
         get_msg(sock)
         if (flag == helper.YOUR_TURN):
             print('Your turn')
