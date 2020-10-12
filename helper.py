@@ -1,19 +1,21 @@
 # Constant
 PACK_BUF_SIZE = 1
-INT_FLAG = '!B'
+INT_FLAG = '!b'
 CHAR_FLAG = '!c'
 END_MSG_FLAG = b'\t'
+BUF_SIZE = 1024
+DEFAULT_INVALID_NUM = -1
 
 # Constant flag
 YOUR_TURN = b'T'
-OTHER_TURN = b'O'
+OTHER_PLAYER_TURN = b'O'
 END_GAME = b'E'
 INVALID = b'I'
 
 
 def recv_mes_until_end_flag(sc):
-    ''' Purpose: get data from socket connection object until it gets a newline ('\n')
-                the newline is removed from the message
+    ''' Purpose: get data from socket connection object until it gets END_MSG_FLAG
+                the END_MSG_FLAG is removed from the message
         Paramerters: 
             sc: socket connection object
         Return 
@@ -28,7 +30,8 @@ def recv_mes_until_end_flag(sc):
             return message
         message = message + data
 
-def recv_fixed_buf_size_mes(sc, buf_size):
+
+def recv_fixed_buf_size_mes(sc, expected_size):
     ''' Purpose: get data from socket connection object 
             until the data length is equal to buf_size
             Because sc.recv(buf_size) may receive data less than buf_size
@@ -40,9 +43,11 @@ def recv_fixed_buf_size_mes(sc, buf_size):
         Note: May cause crashes if the buf_size is too large 
             and machine memory can not handle it
     '''
-    message = b''
-    while True:
-        data = sc.recv(buf_size - len(message))
-        message = message + data
-        if len(message) == buf_size:
-            return message
+    current_size = 0
+    buffer = b''
+    while current_size < expected_size:
+        requested_size = min(expected_size - current_size, BUF_SIZE)
+        data = sc.recv(requested_size)
+        buffer = buffer + data
+        current_size = current_size + len(data)
+    return buffer
