@@ -4,7 +4,6 @@ import socket
 import helper
 import struct
 
-BUF_SIZE = 1024
 HOST = '127.0.0.1'
 PORT = 12345
  
@@ -23,8 +22,9 @@ print(welcome_msg.decode('utf-8'))
 
 def get_msg(sc):
     ''' Purpose: receive and print message from server
-        The message will contain end flag, 
-            so recv_mes_until_end_flag() will be called in the function
+            * As the message will contain END_MSG_FLAG, 
+            it will call recv_mes_until_end_flag() from helper
+            * After receiving message, function will decode and print the message.
         Params: sc: socket connection object
     '''
     data = helper.recv_mes_until_end_flag(sc)
@@ -32,10 +32,10 @@ def get_msg(sc):
     print(msg)
 
 def get_input(msg):
-    ''' Purpose: prompt user to enter input, get input, convert to Integer and return it
-        Return (int) number input from user
+    ''' Purpose: prompt user to enter input, get input, convert it to Integer and return it
+        Return (int) input number from user
         Note: if user input is invalid (non-integer), 
-        exception will be catch and function will set number to DEFAULT_INVALID_NUM
+            exception will be catched and function will set data to DEFAULT_INVALID_NUM
     '''
     try:
         data = int(input(msg))
@@ -44,11 +44,11 @@ def get_input(msg):
     return data
 
 def send_input(sc, data):
-    ''' Purpose: send number to server. As the data is integer, struck.pack is use with INT_FLAG
+    ''' Purpose: send data (number) to server. As data is integer, struck.pack uses INT_FLAG from helper
         Params: sc: socket connection object
                 data: (integer) number to be sent
-        Note: if struct can not pack number. Ex: number is very large. 
-        Exception will be catched and it will send DEFAULT_INVALID_NUM instead
+        Note: if struct can not pack data. Eg: in case data is very large number. 
+            Exception will be catched and it will send DEFAULT_INVALID_NUM instead
     '''
     try:
         data_byte = struct.pack(helper.INT_FLAG, data)
@@ -58,12 +58,12 @@ def send_input(sc, data):
 
 while True:
     ''' The work flow of client
-            * Receive flag from server
-            * get and print board from server
-            * run the code block based on flag value
+            * Get flag from server
+            * Get and print board from server
+            * Based on flag value, it will execute a suitable code block in if-else statement.
     '''
     try:
-        flag = helper.recv_fixed_buf_size_mes(sock, helper.PACK_BUF_SIZE)
+        flag = helper.recv_fixed_buf_size_mes(sock, helper.FLAG_BUF_SIZE)
 
         get_msg(sock)
         if (flag == helper.YOUR_TURN):

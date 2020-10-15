@@ -23,18 +23,18 @@ for i in range(NUM_PLAYERS):
 
 
 def contactPlayer(player_id, game_control):
-    ''' Purpose: function will be called by thread, it will run the play flow for each user turn
+    ''' Purpose: function will be called by each thread, it will run the game flow on each turn
         Flow: * Acquire semaphore for current player 
-              * set current player to game_control object
-              * Run flow of each turn by calling play_turn() method
+              * Run flow of each turn by calling play_turn() and pass player_id as an argument
               * player_turn() method will return True or False
               * If value is True means the game has result, the loop will be terminated
               * If value if False, sermaphore will be released for the next player
+        Params: (int) player_id of each thread
+                game_control: GameControl object that holds the logic and flow of the game
     '''
     while True:
         locks[player_id].acquire()
-        game_control.set_current_player(player_id)
-        has_result = game_control.play_turn()
+        has_result = game_control.play_turn(player_id)
         if(has_result):
             break    
         next_player = (player_id + 1) % 2

@@ -3,9 +3,9 @@ DEFAULT_MARK= '_'
 class Board: 
     ''' Purpose: Board object holds information about board state, num rows and num cols
         Methods:
-            mark(mark, row, rol): mark a position on the board based on row and col
-            get_board_string(): converted board into string that can be printed on the terminal for user to watch
-            check_winner(): check if the board has winner or not
+            mark(mark, row, rol): mark player's symbol on a position of the board based on row and col
+            get_board_string(): get current board in string type that can be presented on the terminal for players
+            check_winner(): check if the current board has a winner or not
             check_cols(): check winner on each column
             check_rows(): check winner on each row
             check_diagonal_left_to_right(): check winner on left-to-right diagonal direction 
@@ -19,12 +19,12 @@ class Board:
 
         
     def mark(self, mark, row, col):
-        '''Purpose: mark a symbol on the board based on row and col
+        ''' Purpose: mark a symbol on the board based on row and col
             Params: mark(string): symbol to mark
                     row(int) row number from player input
                     col(int) col number from player input
-            Note: if row and col are less than 1, out of array lenght 
-                or that position already marked. Exception will be raised
+            Note: if row and col are less than 1, out of array length 
+                or that position already marked, it will raise an exception
         '''
         # check if row and col is valid to set in array
         if(row < 1 or col < 1):
@@ -37,10 +37,10 @@ class Board:
         self.board[index_row][index_col] = mark
 
     def get_board_string(self):
-        ''' Purpose: get the board in string that can presented for users
+        ''' Purpose:  get current board in string type that can be presented on terminal for players.
                 a new line will be inserted at the end of each line, for presentation purpose
                 each element in a row will be separated by a space
-            Return: (string) board state
+            Return: (string) current board state
         '''
         board_str = ''
         for row in self.board:
@@ -50,7 +50,10 @@ class Board:
 
     def check_winner(self):
         ''' Purpose: check the winner in the board
-            Return the winner (symbol) or None 
+                    the method will call check_col, check_row, check_diagonal_left_to_right 
+                    and check_diagonal_right_to_left repspectively unitl it gets winner symbol 
+                    or None value will be returned
+            Return: (string) winner symbol or None
         '''
         winner = None
         winner = self.check_col()
@@ -64,6 +67,8 @@ class Board:
 
     def check_col(self):
         ''' Purpose: iterate each column to check winner
+                if all elements in a column are not DEFAULT_MARK and identical, 
+                winner will be determined, and winner symbol (string) will be returned
             Returns: (string) winner symbol or None
         '''
         col = 0
@@ -85,7 +90,9 @@ class Board:
 
     def check_row(self):
         ''' Purpose: iterate each row to check winner
-            Returns:  winner symbol(string) or None
+                if all elements in a row are not DEFAULT_MARK and identical, 
+                winner will be determined, and winner symbol (string) will be returned
+            Returns:  (string) winner symbol or None
         '''
         winner = None
         for row in self.board:
@@ -98,7 +105,9 @@ class Board:
 
     def check_diagonal_left_to_right(self):
         ''' Purpose: check winner on left-to-right diagonal direction
-            Returns:  winner symbol (string) or None
+                if all elements in left-to-right diagonal direction are not DEFAULT_MARK and identical, 
+                winner will be determined, and winner symbol (string) will be returned
+            Returns:  (string) winner symbol or None
         '''
         item = self.board[0][0]
         if(item == DEFAULT_MARK):
@@ -112,7 +121,9 @@ class Board:
 
     def check_diagonal_right_to_left(self):
         ''' Purpose: check winner on right-to-left diagonal direction
-            Returns:  winner symbol (string) or None
+                if all elements in right-to-left diagonal direction are not DEFAULT_MARK and identical, 
+                winner will be determined, and winner symbol (string) will be returned
+            Returns:  (string) winner symbol or None
         '''
         item = self.board[0][-1]
         if(item == DEFAULT_MARK):
@@ -125,7 +136,7 @@ class Board:
         return item
 
     def is_tie(self):
-        ''' Purpose: check if the board is tie (fullly marked)
+        ''' Purpose: check if the board is tie (fullly marked or no DEFAULT_MARK left) 
             Return (boolean) True if the board is tie or False if not
         '''
         is_full = True

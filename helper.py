@@ -1,4 +1,5 @@
 # Constant
+FLAG_BUF_SIZE = 1
 PACK_BUF_SIZE = 1
 INT_FLAG = '!b'
 CHAR_FLAG = '!c'

@@ -3,7 +3,7 @@ import struct
 
 
 class Player:
-    ''' Purpose: Player object hold info about player (socket connection and mark symbol)
+    ''' Purpose: Player object holdS info about player (socket connection and mark symbol)
                 help server to contact, send and receive message from player (client)
         Methods:
             send(msg):
@@ -11,9 +11,9 @@ class Player:
             recv_integer_msg(buf_size):
             exit(): player exit the game
     '''
-    def __init__(self, sock, mark):
+    def __init__(self, sock, symbol):
         self.sock = sock
-        self.mark = mark
+        self.symbol = symbol
 
     def send(self, msg):
         '''Purpose: give a string, decode and tag this string with ENG_MSG_FLAG
