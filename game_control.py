@@ -12,8 +12,8 @@ class GameControl:
             play_turn(player_id): run the flow of each turn
 
     '''
-    def __init__(self, row, col):
-        self.board = board.Board(row, col)
+    def __init__(self, board_size):
+        self.board = board.Board(board_size)
         self.players = []
         #self.current_player = None
 
@@ -65,21 +65,21 @@ class GameControl:
     def play_turn(self, player_id):
         '''Purpose: run the game flow for each turn
             The game flow is: 
-                * update current_player based on player_id
-                * send YOUR_TURN flag to current_player
-                * send board state (string) to all players
-                * reiceive row and column values from current_player
-                * mark current_player symbol on the board. 
+                * Update current_player based on player_id
+                * Send YOUR_TURN flag to current_player
+                * Send board state (string) to all players
+                * Reiceive row and column values from current_player
+                * Mark current_player symbol on the board. 
                     If row and column values are invalid, Exception will be catched
-                * check result. Call check_result() method.
-                * return True if game has result, otherwise, False value will be returned
+                * Check result. Call check_result() method.
+                * Return True if game has result, otherwise, False value will be returned
             Params: (int) player_id: id of player in the current turn.
             Return:
                 (boolean) True if the game has result (has winner or tie) 
                     or False if it does not yet.
             Exceptions: exception can be raised when marking the board. 
                 In this case, INVALID flag will be sent to current player 
-                and current player will loose the turn
+                and current player will loose the curent turn.
         '''
         current_player = self.players[player_id]
         current_player.send_flag(helper.YOUR_TURN)

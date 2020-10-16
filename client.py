@@ -23,7 +23,7 @@ print(welcome_msg.decode('utf-8'))
 def get_msg(sc):
     ''' Purpose: receive and print message from server
             * As the message will contain END_MSG_FLAG, 
-            it will call recv_mes_until_end_flag() from helper
+                it will call recv_mes_until_end_flag() from helper
             * After receiving message, function will decode and print the message.
         Params: sc: socket connection object
     '''
@@ -46,9 +46,9 @@ def get_input(msg):
 def send_input(sc, data):
     ''' Purpose: send data (number) to server. As data is integer, struck.pack uses INT_FLAG from helper
         Params: sc: socket connection object
-                data: (integer) number to be sent
+                data: (Int) number to be sent
         Note: if struct can not pack data. Eg: in case data is very large number. 
-            Exception will be catched and it will send DEFAULT_INVALID_NUM instead
+            Exception will be catched and it will send DEFAULT_INVALID_NUM value instead
     '''
     try:
         data_byte = struct.pack(helper.INT_FLAG, data)
@@ -60,7 +60,7 @@ while True:
     ''' The work flow of client
             * Get flag from server
             * Get and print board from server
-            * Based on flag value, it will execute a suitable code block in if-else statement.
+            * Based on flag value, it will execute a suitable block of code in if-else statement.
     '''
     try:
         flag = helper.recv_fixed_buf_size_mes(sock, helper.FLAG_BUF_SIZE)

@@ -52,7 +52,7 @@ class Player:
     def exit(self):
         '''Purpose: close the socket connection of player
             The purpose of this method is to create an inteface of player object
-            so we don't need to write player.sock.close() and make the code more lossely tight
+            so we don't need to write player.sock.close() and make the code loosely tight
         '''
         self.sock.close()
         

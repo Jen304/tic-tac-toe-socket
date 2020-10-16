@@ -10,8 +10,8 @@ HOST = ''
 PORT = 12345
 
 # constant for the game
-NUM_ROWS = 5
-NUM_COLS = 5
+# the board is square board
+BOARD_SIZE = 5
 NUM_PLAYERS = 2
 PLAYER_SYMBOLS = ['X', 'O']
 
@@ -25,10 +25,10 @@ for i in range(NUM_PLAYERS):
 def contactPlayer(player_id, game_control):
     ''' Purpose: function will be called by each thread, it will run the game flow on each turn
         Flow: * Acquire semaphore for current player 
-              * Run flow of each turn by calling play_turn() and pass player_id as an argument
-              * player_turn() method will return True or False
-              * If value is True means the game has result, the loop will be terminated
-              * If value if False, sermaphore will be released for the next player
+              * Run flow of each turn by calling play_turn() of game_control object and pass current player_id as an argument
+              * player_turn() method will run the game flow and return a boolean value
+                * If value is True means the game has a result, the loop will be terminated
+                * If value if False, sermaphore will be released for the next player
         Params: (int) player_id of each thread
                 game_control: GameControl object that holds the logic and flow of the game
     '''
@@ -55,7 +55,7 @@ sock.listen(NUM_PLAYERS)
 print('Server: ', sock.getsockname())
 
 # init game control object
-game_control = GameControl(NUM_ROWS, NUM_COLS)
+game_control = GameControl(BOARD_SIZE)
 new_player = None
 
 # only accept NUM_PLAYERS connections

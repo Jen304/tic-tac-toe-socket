@@ -1,21 +1,22 @@
 DEFAULT_MARK= '_'
 
 class Board: 
-    ''' Purpose: Board object holds information about board state, num rows and num cols
+    ''' Purpose: Board object holds information about board state, size 
+            As the board is square, row and column are identical, the board only need 1 number value to determine the size.
         Methods:
-            mark(mark, row, rol): mark player's symbol on a position of the board based on row and col
+            mark(mark, row, rol): mark player's symbol on a position of the board based on row and col indexes
             get_board_string(): get current board in string type that can be presented on the terminal for players
-            check_winner(): check if the current board has a winner or not
+            check_winner(): check if the board has a winner or not
             check_cols(): check winner on each column
             check_rows(): check winner on each row
             check_diagonal_left_to_right(): check winner on left-to-right diagonal direction 
             check_diagonal_right_to_left(): check winner on right-to-left diagonal direction
+            is_tie(): check if the board is fully marked by players.
     '''
-    def __init__(self, num_rows, num_cols):
+    def __init__(self, size):
         self.board = []
-        self.rows = num_rows
-        self.cols = num_cols
-        self.board = [ [DEFAULT_MARK] * num_cols for i in range(num_rows)]
+        self.size = size
+        self.board = [ [DEFAULT_MARK] * size for i in range(size)]
 
         
     def mark(self, mark, row, col):
@@ -23,8 +24,8 @@ class Board:
             Params: mark(string): symbol to mark
                     row(int) row number from player input
                     col(int) col number from player input
-            Note: if row and col are less than 1, out of array length 
-                or that position already marked, it will raise an exception
+            Note: if row and col indexs are less than 1, out of array length 
+                or the position already marked, it will raise an exception
         '''
         # check if row and col is valid to set in array
         if(row < 1 or col < 1):
@@ -73,11 +74,11 @@ class Board:
         '''
         col = 0
         winner = None
-        while col < self.cols:
+        while col < self.size:
             item = self.board[0][col]
             if(item != DEFAULT_MARK):
                 all_matched = True
-                for row in range(self.rows):
+                for row in range(self.size):
                     if item != self.board[row][col]:
                         all_matched = False
                         break
@@ -113,7 +114,7 @@ class Board:
         if(item == DEFAULT_MARK):
             return None
         i = 1
-        while i < self.rows:
+        while i < self.size:
             if item != self.board[i][i]:
                 return None
             i = i + 1
@@ -129,8 +130,8 @@ class Board:
         if(item == DEFAULT_MARK):
             return None
         i = 1
-        while i < self.rows:
-            if item != self.board[i][self.cols - 1 - i]:
+        while i < self.size:
+            if item != self.board[i][self.size - 1 - i]:
                 return None
             i = i + 1
         return item
