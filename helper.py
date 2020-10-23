@@ -7,10 +7,16 @@ BUF_SIZE = 1024
 DEFAULT_INVALID_NUM = -1
 
 # Constant flag
-YOUR_TURN = b'T'
-OTHER_PLAYER_TURN = b'O'
-END_GAME = b'E'
-INVALID = b'I'
+YOUR_TURN =  0b1100100
+# OTHER_PLAYER_TURN = b'O'
+# END_GAME = b'E'
+# INVALID = b'I'
+# WELCOME = b'W'
+
+WELCOME = 0b11001000
+END_GAME = 0b11001010
+#MOVE = 0b1100100
+INVALID = 0b11010000
 
 
 def recv_mes_until_end_flag(sc):

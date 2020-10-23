@@ -71,6 +71,6 @@ for player_id in range(NUM_PLAYERS):
     threading.Thread(target = contactPlayer, args = (player_id, game_control)).start()
 
 # send second player OTHER_PLAYER_TURN flag to notify that the first turn is other player
-new_player.send_flag(helper.OTHER_PLAYER_TURN)
+#new_player.send_flag(helper.OTHER_PLAYER_TURN)
 locks[0].release()
 

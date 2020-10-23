@@ -22,7 +22,7 @@ class Player:
             Note: client may not read the whole message 
             if the message already contain the same character like ENG_MSG_FLAG
         '''
-        msg_byte = msg.encode('utf-8') + helper.END_MSG_FLAG
+        msg_byte = msg.encode('utf-8') 
         self.sock.sendall(msg_byte)
 
     def send_flag(self, flag):
@@ -34,7 +34,12 @@ class Player:
             Parameter: flag (byte) a byte of character as a flag for 
             client to know what is the their next step
         '''
-        self.sock.sendall(flag)
+        flag_byte = struct.pack('!B', flag)
+        self.sock.sendall(flag_byte)
+
+    def send_message_size(self, size):
+        size_byte = struct.pack('!B', size)
+        self.sock.sendall(size_byte)
 
     def recv_integer_msg(self, buf_size = helper.PACK_BUF_SIZE):
         '''Purpose: receive message from client
