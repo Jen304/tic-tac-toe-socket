@@ -3,52 +3,65 @@ new file mode 100644
 index 0000000..f30e2aa
 Binary files /dev/null and b/capture.pcap differ
 diff --git a/game_control.py b/game_control.py
-index 9e688fc..691ffaa 100644
+index 9e688fc..707b6f9 100644
 --- a/game_control.py
 +++ b/game_control.py
-@@ -23,6 +23,9 @@ class GameControl:
+@@ -15,7 +15,6 @@ class GameControl:
+     def __init__(self, board_size):
+         self.board = board.Board(board_size)
+         self.players = []
+-        #self.current_player = None
+ 
+     def add_player(self, new_player):
+         '''Purpose: append the player object to players list
+@@ -23,6 +22,9 @@ class GameControl:
          '''
          self.players.append(new_player)
          welcome_mesg = "Welcome to tic tac toe game. You are {}".format(new_player.symbol)
 +        size = len(welcome_mesg)
-+        new_player.send_flag(helper.WELCOME)
-+        new_player.send_message_size(size)
++        new_player.send_packed_msg(helper.WELCOME)
++        new_player.send_packed_msg(size)
          new_player.send(welcome_mesg)    
  
      def check_result(self):  
-@@ -51,7 +54,8 @@ class GameControl:
+@@ -49,11 +51,11 @@ class GameControl:
+             After that it will close connection to each player
+         '''
          for player in self.players:
-             player.send_flag(helper.END_GAME)
+-            player.send_flag(helper.END_GAME)
++            player.send_packed_msg(helper.END_GAME)
              current_board = self.board.get_board_string()
 -            player.send(current_board)
-+            #player.send(current_board)
-+            player.send_message_size(len(msg))
++            player.send_packed_msg(len(msg))
              player.send(msg)
-             player.exit()
+-            player.exit()
++            
      
-@@ -84,7 +88,8 @@ class GameControl:
+     def send_to_all_players(self, msg):
+         '''Purpose: give a message in string type and send to each player in players list
+@@ -82,9 +84,10 @@ class GameControl:
+                 and current player will loose the curent turn.
+         '''
          current_player = self.players[player_id]
-         current_player.send_flag(helper.YOUR_TURN)
+-        current_player.send_flag(helper.YOUR_TURN)
++        current_player.send_packed_msg(helper.YOUR_TURN)
          current_board = self.board.get_board_string()
 -        self.send_to_all_players(current_board)
-+        current_player.send_message_size(len(current_board))
++        current_player.send_packed_msg(len(current_board))
 +        current_player.send(current_board)
          try:
              row = current_player.recv_integer_msg() 
              col = current_player.recv_integer_msg() 
-@@ -93,10 +98,13 @@ class GameControl:
+@@ -92,11 +95,9 @@ class GameControl:
+             self.board.mark(current_player.symbol, row, col)
              result = self.check_result()
              if result:
-                 return True
+-                return True
 -            current_player.send_flag(helper.OTHER_PLAYER_TURN)    
-+            #current_player.send_flag(helper.OTHER_PLAYER_TURN)    
++                return True   
          except Exception as details:
              print(details)
 -            current_player.send_flag(helper.INVALID)
-+            # #current_player.send_flag(helper.INVALID)
-+            # msg = "Invalid input"
-+            # current_player.send_message_size(len(msg))
-+            # current_player.send(msg)
              return False
          return False
      
@@ -79,10 +92,10 @@ index affe216..ca70295 100644
  
  def recv_mes_until_end_flag(sc):
 diff --git a/player.py b/player.py
-index 810aea5..9ad5b85 100644
+index 810aea5..1748777 100644
 --- a/player.py
 +++ b/player.py
-@@ -22,7 +22,7 @@ class Player:
+@@ -22,10 +22,10 @@ class Player:
              Note: client may not read the whole message 
              if the message already contain the same character like ENG_MSG_FLAG
          '''
@@ -90,7 +103,11 @@ index 810aea5..9ad5b85 100644
 +        msg_byte = msg.encode('utf-8') 
          self.sock.sendall(msg_byte)
  
-     def send_flag(self, flag):
+-    def send_flag(self, flag):
++    def send_packed_msg(self, flag):
+         '''Purpose: give a flag as a byte type, send it to player via socket connection
+             The purpose of this method is to make the interface for player object
+             as we don't need to code like player.sock.sendall(flag) 
 @@ -34,7 +34,12 @@ class Player:
              Parameter: flag (byte) a byte of character as a flag for 
              client to know what is the their next step
@@ -99,14 +116,14 @@ index 810aea5..9ad5b85 100644
 +        flag_byte = struct.pack('!B', flag)
 +        self.sock.sendall(flag_byte)
 +
-+    def send_message_size(self, size):
-+        size_byte = struct.pack('!B', size)
-+        self.sock.sendall(size_byte)
++    # def send_message_size(self, size):
++    #     size_byte = struct.pack('!B', size)
++    #     self.sock.sendall(size_byte)
  
      def recv_integer_msg(self, buf_size = helper.PACK_BUF_SIZE):
          '''Purpose: receive message from client
 diff --git a/server.py b/server.py
-index 16ddbc0..4297538 100755
+index 16ddbc0..6426dd5 100755
 --- a/server.py
 +++ b/server.py
 @@ -6,7 +6,7 @@ from player import Player
@@ -118,19 +135,39 @@ index 16ddbc0..4297538 100755
  PORT = 12345
  
  # constant for the game
-@@ -36,9 +36,11 @@ def contactPlayer(player_id, game_control):
+@@ -20,7 +20,7 @@ locks = []
+ for i in range(NUM_PLAYERS):
+     locks.append(threading.Semaphore())
+     locks[-1].acquire()
+-
++has_result = False
+ 
+ def contactPlayer(player_id, game_control):
+     ''' Purpose: function will be called by each thread, it will run the game flow on each turn
+@@ -32,13 +32,20 @@ def contactPlayer(player_id, game_control):
+         Params: (int) player_id of each thread
+                 game_control: GameControl object that holds the logic and flow of the game
+     '''
++    global has_result
+     while True:
          locks[player_id].acquire()
-         has_result = game_control.play_turn(player_id)
+-        has_result = game_control.play_turn(player_id)
          if(has_result):
+-            break    
 +            print('stop')
-             break    
++            game_control.players[player_id].exit()
++            next_player = (player_id + 1) % 2
++            locks[next_player].release()
++            break 
++        has_result = game_control.play_turn(player_id)
          next_player = (player_id + 1) % 2
          locks[next_player].release()
++           
 +    
  
  # TCP socket
  sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-@@ -71,6 +73,8 @@ for player_id in range(NUM_PLAYERS):
+@@ -71,6 +78,8 @@ for player_id in range(NUM_PLAYERS):
      threading.Thread(target = contactPlayer, args = (player_id, game_control)).start()
  
  # send second player OTHER_PLAYER_TURN flag to notify that the first turn is other player
@@ -140,3 +177,151 @@ index 16ddbc0..4297538 100755
  
 +sock.close()
 +
+diff --git a/update.txt b/update.txt
+new file mode 100644
+index 0000000..2cc6faa
+--- /dev/null
++++ b/update.txt
+@@ -0,0 +1,142 @@
++diff --git a/capture.pcap b/capture.pcap
++new file mode 100644
++index 0000000..f30e2aa
++Binary files /dev/null and b/capture.pcap differ
++diff --git a/game_control.py b/game_control.py
++index 9e688fc..691ffaa 100644
++--- a/game_control.py
+++++ b/game_control.py
++@@ -23,6 +23,9 @@ class GameControl:
++         '''
++         self.players.append(new_player)
++         welcome_mesg = "Welcome to tic tac toe game. You are {}".format(new_player.symbol)
+++        size = len(welcome_mesg)
+++        new_player.send_flag(helper.WELCOME)
+++        new_player.send_message_size(size)
++         new_player.send(welcome_mesg)    
++ 
++     def check_result(self):  
++@@ -51,7 +54,8 @@ class GameControl:
++         for player in self.players:
++             player.send_flag(helper.END_GAME)
++             current_board = self.board.get_board_string()
++-            player.send(current_board)
+++            #player.send(current_board)
+++            player.send_message_size(len(msg))
++             player.send(msg)
++             player.exit()
++     
++@@ -84,7 +88,8 @@ class GameControl:
++         current_player = self.players[player_id]
++         current_player.send_flag(helper.YOUR_TURN)
++         current_board = self.board.get_board_string()
++-        self.send_to_all_players(current_board)
+++        current_player.send_message_size(len(current_board))
+++        current_player.send(current_board)
++         try:
++             row = current_player.recv_integer_msg() 
++             col = current_player.recv_integer_msg() 
++@@ -93,10 +98,13 @@ class GameControl:
++             result = self.check_result()
++             if result:
++                 return True
++-            current_player.send_flag(helper.OTHER_PLAYER_TURN)    
+++            #current_player.send_flag(helper.OTHER_PLAYER_TURN)    
++         except Exception as details:
++             print(details)
++-            current_player.send_flag(helper.INVALID)
+++            # #current_player.send_flag(helper.INVALID)
+++            # msg = "Invalid input"
+++            # current_player.send_message_size(len(msg))
+++            # current_player.send(msg)
++             return False
++         return False
++     
++\ No newline at end of file
++diff --git a/helper.py b/helper.py
++index affe216..ca70295 100644
++--- a/helper.py
+++++ b/helper.py
++@@ -7,10 +7,16 @@ BUF_SIZE = 1024
++ DEFAULT_INVALID_NUM = -1
++ 
++ # Constant flag
++-YOUR_TURN = b'T'
++-OTHER_PLAYER_TURN = b'O'
++-END_GAME = b'E'
++-INVALID = b'I'
+++YOUR_TURN =  0b1100100
+++# OTHER_PLAYER_TURN = b'O'
+++# END_GAME = b'E'
+++# INVALID = b'I'
+++# WELCOME = b'W'
+++
+++WELCOME = 0b11001000
+++END_GAME = 0b11001010
+++#MOVE = 0b1100100
+++INVALID = 0b11010000
++ 
++ 
++ def recv_mes_until_end_flag(sc):
++diff --git a/player.py b/player.py
++index 810aea5..9ad5b85 100644
++--- a/player.py
+++++ b/player.py
++@@ -22,7 +22,7 @@ class Player:
++             Note: client may not read the whole message 
++             if the message already contain the same character like ENG_MSG_FLAG
++         '''
++-        msg_byte = msg.encode('utf-8') + helper.END_MSG_FLAG
+++        msg_byte = msg.encode('utf-8') 
++         self.sock.sendall(msg_byte)
++ 
++     def send_flag(self, flag):
++@@ -34,7 +34,12 @@ class Player:
++             Parameter: flag (byte) a byte of character as a flag for 
++             client to know what is the their next step
++         '''
++-        self.sock.sendall(flag)
+++        flag_byte = struct.pack('!B', flag)
+++        self.sock.sendall(flag_byte)
+++
+++    def send_message_size(self, size):
+++        size_byte = struct.pack('!B', size)
+++        self.sock.sendall(size_byte)
++ 
++     def recv_integer_msg(self, buf_size = helper.PACK_BUF_SIZE):
++         '''Purpose: receive message from client
++diff --git a/server.py b/server.py
++index 16ddbc0..4297538 100755
++--- a/server.py
+++++ b/server.py
++@@ -6,7 +6,7 @@ from player import Player
++ import helper
++ 
++ # constant for socket
++-HOST = ''
+++HOST = '127.0.0.1'
++ PORT = 12345
++ 
++ # constant for the game
++@@ -36,9 +36,11 @@ def contactPlayer(player_id, game_control):
++         locks[player_id].acquire()
++         has_result = game_control.play_turn(player_id)
++         if(has_result):
+++            print('stop')
++             break    
++         next_player = (player_id + 1) % 2
++         locks[next_player].release()
+++    
++ 
++ # TCP socket
++ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
++@@ -71,6 +73,8 @@ for player_id in range(NUM_PLAYERS):
++     threading.Thread(target = contactPlayer, args = (player_id, game_control)).start()
++ 
++ # send second player OTHER_PLAYER_TURN flag to notify that the first turn is other player
++-new_player.send_flag(helper.OTHER_PLAYER_TURN)
+++#new_player.send_flag(helper.OTHER_PLAYER_TURN)
++ locks[0].release()
++ 
+++sock.close()
+++
