@@ -101,10 +101,10 @@ class GameControl:
             #current_player.send_flag(helper.OTHER_PLAYER_TURN)    
         except Exception as details:
             print(details)
-            current_player.send_flag(helper.INVALID)
-            msg = "Invalid input"
-            current_player.send_message_size(len(msg))
-            current_player.send(msg)
+            # #current_player.send_flag(helper.INVALID)
+            # msg = "Invalid input"
+            # current_player.send_message_size(len(msg))
+            # current_player.send(msg)
             return False
         return False
     

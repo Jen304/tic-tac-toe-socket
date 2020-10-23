@@ -6,7 +6,7 @@ from player import Player
 import helper
 
 # constant for socket
-HOST = ''
+HOST = '127.0.0.1'
 PORT = 12345
 
 # constant for the game
@@ -36,9 +36,11 @@ def contactPlayer(player_id, game_control):
         locks[player_id].acquire()
         has_result = game_control.play_turn(player_id)
         if(has_result):
+            print('stop')
             break    
         next_player = (player_id + 1) % 2
         locks[next_player].release()
+    
 
 # TCP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
@@ -73,4 +75,6 @@ for player_id in range(NUM_PLAYERS):
 # send second player OTHER_PLAYER_TURN flag to notify that the first turn is other player
 #new_player.send_flag(helper.OTHER_PLAYER_TURN)
 locks[0].release()
+
+sock.close()
 
