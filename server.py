@@ -20,7 +20,7 @@ locks = []
 for i in range(NUM_PLAYERS):
     locks.append(threading.Semaphore())
     locks[-1].acquire()
-
+has_result = False
 
 def contactPlayer(player_id, game_control):
     ''' Purpose: function will be called by each thread, it will run the game flow on each turn
@@ -32,14 +32,19 @@ def contactPlayer(player_id, game_control):
         Params: (int) player_id of each thread
                 game_control: GameControl object that holds the logic and flow of the game
     '''
+    global has_result
     while True:
         locks[player_id].acquire()
-        has_result = game_control.play_turn(player_id)
         if(has_result):
             print('stop')
-            break    
+            game_control.players[player_id].exit()
+            next_player = (player_id + 1) % 2
+            locks[next_player].release()
+            break 
+        has_result = game_control.play_turn(player_id)
         next_player = (player_id + 1) % 2
         locks[next_player].release()
+           
     
 
 # TCP socket

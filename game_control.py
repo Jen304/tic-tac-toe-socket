@@ -55,7 +55,7 @@ class GameControl:
             current_board = self.board.get_board_string()
             player.send_packed_msg(len(msg))
             player.send(msg)
-            player.exit()
+            
     
     def send_to_all_players(self, msg):
         '''Purpose: give a message in string type and send to each player in players list
