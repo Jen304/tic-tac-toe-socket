@@ -25,7 +25,7 @@ class Player:
         msg_byte = msg.encode('utf-8') 
         self.sock.sendall(msg_byte)
 
-    def send_flag(self, flag):
+    def send_packed_msg(self, flag):
         '''Purpose: give a flag as a byte type, send it to player via socket connection
             The purpose of this method is to make the interface for player object
             as we don't need to code like player.sock.sendall(flag) 
@@ -37,9 +37,9 @@ class Player:
         flag_byte = struct.pack('!B', flag)
         self.sock.sendall(flag_byte)
 
-    def send_message_size(self, size):
-        size_byte = struct.pack('!B', size)
-        self.sock.sendall(size_byte)
+    # def send_message_size(self, size):
+    #     size_byte = struct.pack('!B', size)
+    #     self.sock.sendall(size_byte)
 
     def recv_integer_msg(self, buf_size = helper.PACK_BUF_SIZE):
         '''Purpose: receive message from client

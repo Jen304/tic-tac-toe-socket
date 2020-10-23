@@ -15,7 +15,6 @@ class GameControl:
     def __init__(self, board_size):
         self.board = board.Board(board_size)
         self.players = []
-        #self.current_player = None
 
     def add_player(self, new_player):
         '''Purpose: append the player object to players list
@@ -24,8 +23,8 @@ class GameControl:
         self.players.append(new_player)
         welcome_mesg = "Welcome to tic tac toe game. You are {}".format(new_player.symbol)
         size = len(welcome_mesg)
-        new_player.send_flag(helper.WELCOME)
-        new_player.send_message_size(size)
+        new_player.send_packed_msg(helper.WELCOME)
+        new_player.send_packed_msg(size)
         new_player.send(welcome_mesg)    
 
     def check_result(self):  
@@ -52,10 +51,9 @@ class GameControl:
             After that it will close connection to each player
         '''
         for player in self.players:
-            player.send_flag(helper.END_GAME)
+            player.send_packed_msg(helper.END_GAME)
             current_board = self.board.get_board_string()
-            #player.send(current_board)
-            player.send_message_size(len(msg))
+            player.send_packed_msg(len(msg))
             player.send(msg)
             player.exit()
     
@@ -86,9 +84,9 @@ class GameControl:
                 and current player will loose the curent turn.
         '''
         current_player = self.players[player_id]
-        current_player.send_flag(helper.YOUR_TURN)
+        current_player.send_packed_msg(helper.YOUR_TURN)
         current_board = self.board.get_board_string()
-        current_player.send_message_size(len(current_board))
+        current_player.send_packed_msg(len(current_board))
         current_player.send(current_board)
         try:
             row = current_player.recv_integer_msg() 
@@ -97,14 +95,9 @@ class GameControl:
             self.board.mark(current_player.symbol, row, col)
             result = self.check_result()
             if result:
-                return True
-            #current_player.send_flag(helper.OTHER_PLAYER_TURN)    
+                return True   
         except Exception as details:
             print(details)
-            # #current_player.send_flag(helper.INVALID)
-            # msg = "Invalid input"
-            # current_player.send_message_size(len(msg))
-            # current_player.send(msg)
             return False
         return False
     
